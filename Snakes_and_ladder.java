@@ -1,47 +1,60 @@
-// Algo used Topological Sort
-//Same as Course Schedule 1 , just here we are returining topo as an array
 class Solution {
-    public int[] findOrder(int numCourses, int[][] prerequisites) {
-         ArrayList<ArrayList<Integer>> adj= new ArrayList<>();// creating our adj list
-        for(int i= 0; i< numCourses; i++){
-            adj.add(new ArrayList<>());
-        }
+    public int snakesAndLadders(int[][] board) {
+        int n = board.length;
+        boolean[] visited = new boolean[n*n+1];
+        Queue<Integer> q = new LinkedList<>();
+        q.offer(1);
+        int ct = 0;
 
-        int m = prerequisites.length; // converting the input prerequisites to adjList Step1
-        for(int i=0;i<m;i++){
-            adj.get(prerequisites[i][1]).add(prerequisites[i][0]);
-        }
+        while(!q.isEmpty()) {
+            int size = q.size();
 
-        int[] indegree= new int[numCourses]; // indegree array
+            while(size>0) {
+                int id = q.poll();
 
-        for(int i=0; i< numCourses; i++){   // marking the incoming edges (incoming edges) of node node Step2
-            for(int it: adj.get(i)){
-                indegree[it]++;
-            }
-        }
-
-        Queue<Integer> q= new LinkedList<>();   
-        int[] topo= new int[numCourses];    // topo sort list
-        int index=0;
-        for(int i=0; i< numCourses; i++){   // // getting the nodes with 0 in-degree Step3
-            if(indegree[i]== 0){
-                q.add(i);
-            }
-        }
-
-        while(!q.isEmpty()){    // doing our Topo sort BFS(Kahn's) Step4
-            int node= q.poll();
-            topo[index++]= node;
-            for(int it: adj.get(node)){
-                indegree[it]--; // removing the edges for the node nodes added in queue
-                if(indegree[it] == 0){  // if at any point the node who are becoming 0 after decreaising then add in queue
-                    q.add(it);
+                if (id==n*n) {
+                    return ct;
                 }
+
+                for (int i=id+1; i<=Math.min(id+6, n*n); i++) {
+                    int[] ps = transformIdToPosition(i, n);
+                    int val = board[ps[0]][ps[1]];
+                    int nextId = i;
+
+                    if (val != -1) {
+                        nextId = val;
+                    }
+
+                    if(visited[nextId]) {
+                        continue;
+                    }
+                    
+                    q.offer(nextId);
+                    visited[nextId] = true;
+                }
+                size--;
             }
+            ct++;
         }
-        if(numCourses == index) return topo;
-        int[] res= {};
-        return res;
-        
+
+        return -1;
+    }
+
+    private int[] transformIdToPosition(int id, int n) {
+        int r = (id-1)/n;
+        int c = (id-1)%n;
+        if (r%2==1) {
+            c = n-1-c;
+        }
+        return new int[]{n-1-r,c};
+    }
+
+    private int transformPositionToId(int[] pos, int n) {
+        int r = pos[0];
+        int c = pos[1];
+        if (r%2==1) {
+            c = n-1-c;
+        }
+        return (n-1-r)*n+c+1;
     }
 }
